@@ -1,0 +1,53 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: learning-assistant
+  
+  # 使用H2内存数据库，无需安装MySQL
+  datasource:
+    url: jdbc:h2:file:./data/learning_assistant;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password: 
+    driver-class-name: org.h2.Driver
+  
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+        format_sql: true
+  
+  # H2控制台（开发调试使用）
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 10MB
+      max-request-size: 100MB
+
+# AI Service Configuration
+# 请替换为你的百度API密钥
+ai:
+  baidu:
+    api-key: ${BAIDU_API_KEY:}
+    secret-key: ${BAIDU_SECRET_KEY:}
+    ocr-api-key: ${BAIDU_OCR_API_KEY:}
+    ocr-secret-key: ${BAIDU_OCR_SECRET_KEY:}
+
+# File Upload Configuration
+upload:
+  path: ./uploads/
+
+# Logging
+logging:
+  level:
+    com.example.app: DEBUG
+    org.springframework.web: INFO
