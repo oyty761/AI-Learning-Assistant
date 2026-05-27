@@ -4,6 +4,8 @@ server:
 spring:
   application:
     name: learning-assistant
+  profiles:
+    active: local
   
   # 使用H2内存数据库，无需安装MySQL
   datasource:
