@@ -32,7 +32,17 @@ public class DiagnoseController {
             result.put("text", text);
             return ResponseEntity.ok(result);
         } catch (IOException e) {
-            return ResponseEntity.badRequest().body("上传失败: " + e.getMessage());
+            Map<String, String> error = new HashMap<>();
+            error.put("error", "上传失败");
+            error.put("message", e.getMessage());
+            error.put("text", "图片上传失败，请重试或手动输入内容");
+            return ResponseEntity.badRequest().body(error);
+        } catch (Exception e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("error", "处理失败");
+            error.put("message", e.getMessage());
+            error.put("text", "图片处理失败，请重试或手动输入内容");
+            return ResponseEntity.badRequest().body(error);
         }
     }
 

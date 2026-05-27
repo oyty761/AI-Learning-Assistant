@@ -2,6 +2,7 @@ package com.example.app.controller;
 
 import com.example.app.entity.Note;
 import com.example.app.service.NoteService;
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,13 +27,20 @@ public class NoteController {
     @PostMapping("/upload")
     public ResponseEntity<?> uploadFile(@RequestParam("file") MultipartFile file) {
         try {
-            String fileName = noteService.uploadFile(file);
-            Map<String, String> result = new HashMap<>();
-            result.put("fileName", fileName);
-            result.put("message", "文件上传成功");
+            Map<String, String> result = noteService.uploadAndExtractText(file);
             return ResponseEntity.ok(result);
         } catch (IOException e) {
-            return ResponseEntity.badRequest().body("文件上传失败: " + e.getMessage());
+            Map<String, String> error = new HashMap<>();
+            error.put("error", "文件上传失败");
+            error.put("message", e.getMessage());
+            error.put("text", "文件上传失败，请重试或手动输入内容");
+            return ResponseEntity.badRequest().body(error);
+        } catch (Exception e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("error", "文件处理失败");
+            error.put("message", e.getMessage());
+            error.put("text", "文件处理失败，请重试或手动输入内容");
+            return ResponseEntity.badRequest().body(error);
         }
     }
 
@@ -40,19 +48,31 @@ public class NoteController {
      * 生成结构化笔记
      */
     @PostMapping("/generate")
-    public ResponseEntity<?> generateNotes(
-            @RequestParam String userId,
-            @RequestParam String theme,
-            @RequestParam String concepts,
-            @RequestParam String content,
-            @RequestParam(required = false) String sourceFile) {
-        
+    public ResponseEntity<?> generateNotes(@RequestBody GenerateNotesRequest request) {
         try {
-            Note note = noteService.generateNotes(userId, theme, concepts, content, sourceFile);
+            Note note = noteService.generateNotes(
+                request.getUserId(),
+                request.getTheme(),
+                request.getConcepts(),
+                request.getContent(),
+                request.getSourceFile()
+            );
             return ResponseEntity.ok(note);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("生成笔记失败: " + e.getMessage());
         }
+    }
+
+    /**
+     * 生成笔记请求DTO
+     */
+    @Data
+    public static class GenerateNotesRequest {
+        private String userId;
+        private String theme;
+        private String concepts;
+        private String content;
+        private String sourceFile;
     }
 
     /**

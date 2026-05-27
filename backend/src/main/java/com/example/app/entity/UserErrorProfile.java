@@ -32,6 +32,9 @@ public class UserErrorProfile {
     @Column(name = "error_count")
     private Integer errorCount;
     
+    @Column(name = "error_details", columnDefinition = "TEXT")
+    private String errorDetails;
+    
     @Column(name = "last_error_time")
     private LocalDateTime lastErrorTime;
     

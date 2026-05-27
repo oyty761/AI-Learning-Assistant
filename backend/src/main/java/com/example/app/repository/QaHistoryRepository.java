@@ -8,8 +8,14 @@ import java.util.List;
 
 @Repository
 public interface QaHistoryRepository extends JpaRepository<QaHistory, Long> {
-    
+
     List<QaHistory> findByUserIdOrderByCreatedAtDesc(String userId);
-    
+
     List<QaHistory> findTop10ByUserIdOrderByCreatedAtDesc(String userId);
+
+    // 根据会话ID查询所有消息
+    List<QaHistory> findBySessionIdOrderByCreatedAtAsc(String sessionId);
+
+    // 根据用户ID查询所有会话（按会话ID分组，取每个会话的第一条）
+    List<QaHistory> findByUserIdAndIdIn(String userId, List<Long> ids);
 }

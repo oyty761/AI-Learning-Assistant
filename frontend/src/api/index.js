@@ -14,7 +14,7 @@ export const notesApi = {
       headers: { 'Content-Type': 'multipart/form-data' }
     })
   },
-  generateNotes: (data) => api.post('/notes/generate', null, { params: data }),
+  generateNotes: (data) => api.post('/notes/generate', data),
   getNotes: (userId) => api.get('/notes/list', { params: { userId } }),
   getNoteById: (id) => api.get(`/notes/${id}`),
   deleteNote: (id) => api.delete(`/notes/${id}`)
@@ -22,8 +22,11 @@ export const notesApi = {
 
 // 对话导师模块API
 export const tutorApi = {
-  ask: (userId, question) => api.post('/tutor/ask', { userId, question }),
-  getHistory: (userId) => api.get('/tutor/history', { params: { userId } })
+  ask: (userId, question, sessionId) => api.post('/tutor/ask', { userId, question, sessionId }),
+  getHistory: (userId) => api.get('/tutor/history', { params: { userId } }),
+  getSessions: (userId) => api.get('/tutor/sessions', { params: { userId } }),
+  getSessionMessages: (sessionId) => api.get(`/tutor/session/${sessionId}/messages`),
+  deleteSession: (sessionId) => api.delete(`/tutor/session/${sessionId}`)
 }
 
 // 解题诊断模块API
