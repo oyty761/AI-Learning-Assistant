@@ -3,10 +3,18 @@ package com.example.app.service;
 import com.example.app.ai.AiService;
 import com.example.app.entity.QaHistory;
 import com.example.app.repository.QaHistoryRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -19,11 +27,42 @@ public class TutorService {
 
     private final AiService aiService;
     private final QaHistoryRepository qaHistoryRepository;
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
+    @Value("${upload.image-path:D:/uploads/tutor/images/}")
+    private String imageUploadPath;
 
     /**
-     * 创建新会话
+     * 上传图片到D盘
      */
-    public String createSession(String userId, String firstQuestion) {
+    public String uploadImage(MultipartFile file) throws IOException {
+        // 确保上传目录存在
+        Path uploadDir = Paths.get(imageUploadPath);
+        if (!Files.exists(uploadDir)) {
+            Files.createDirectories(uploadDir);
+        }
+
+        // 生成唯一文件名
+        String originalFilename = file.getOriginalFilename();
+        String extension = originalFilename != null && originalFilename.contains(".")
+            ? originalFilename.substring(originalFilename.lastIndexOf("."))
+            : ".jpg";
+        String newFilename = UUID.randomUUID().toString() + extension;
+
+        // 保存文件
+        Path filePath = uploadDir.resolve(newFilename);
+        file.transferTo(filePath.toFile());
+
+        log.info("图片上传成功: {}", filePath);
+
+        // 返回访问URL
+        return "/api/tutor/images/" + newFilename;
+    }
+
+    /**
+     * 创建新会话（支持图片）
+     */
+    public String createSession(String userId, String firstQuestion, List<String> imageUrls) {
         String sessionId = UUID.randomUUID().toString();
         // 生成会话标题（取问题的前20个字符）
         String sessionTitle = firstQuestion.length() > 20
@@ -33,12 +72,23 @@ public class TutorService {
         // 保存第一条消息
         String answer = aiService.socraticDialogue(firstQuestion, new ArrayList<>());
 
+        // 将图片URL列表转为JSON字符串
+        String imageUrlsJson = null;
+        if (imageUrls != null && !imageUrls.isEmpty()) {
+            try {
+                imageUrlsJson = objectMapper.writeValueAsString(imageUrls);
+            } catch (Exception e) {
+                log.error("图片URL序列化失败", e);
+            }
+        }
+
         QaHistory qaHistory = QaHistory.builder()
             .userId(userId)
             .sessionId(sessionId)
             .sessionTitle(sessionTitle)
             .question(firstQuestion)
             .answer(answer)
+            .imageUrls(imageUrlsJson)
             .build();
         qaHistoryRepository.save(qaHistory);
 
@@ -46,9 +96,9 @@ public class TutorService {
     }
 
     /**
-     * 在现有会话中继续对话
+     * 在现有会话中继续对话（支持图片）
      */
-    public String continueDialogue(String userId, String sessionId, String question) {
+    public String continueDialogue(String userId, String sessionId, String question, List<String> imageUrls) {
         // 获取该会话的所有历史消息
         List<QaHistory> sessionHistory = qaHistoryRepository.findBySessionIdOrderByCreatedAtAsc(sessionId);
 
@@ -67,12 +117,23 @@ public class TutorService {
             ? (question.length() > 20 ? question.substring(0, 20) + "..." : question)
             : sessionHistory.get(0).getSessionTitle();
 
+        // 将图片URL列表转为JSON字符串
+        String imageUrlsJson = null;
+        if (imageUrls != null && !imageUrls.isEmpty()) {
+            try {
+                imageUrlsJson = objectMapper.writeValueAsString(imageUrls);
+            } catch (Exception e) {
+                log.error("图片URL序列化失败", e);
+            }
+        }
+
         QaHistory qaHistory = QaHistory.builder()
             .userId(userId)
             .sessionId(sessionId)
             .sessionTitle(sessionTitle)
             .question(question)
             .answer(answer)
+            .imageUrls(imageUrlsJson)
             .build();
         qaHistoryRepository.save(qaHistory);
 
@@ -83,8 +144,8 @@ public class TutorService {
      * 苏格拉底式问答（兼容旧接口，自动创建新会话）
      */
     public String askQuestion(String userId, String question) {
-        // 创建新会话
-        return createSession(userId, question);
+        // 创建新会话（无图片）
+        return createSession(userId, question, null);
     }
 
     /**

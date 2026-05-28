@@ -342,21 +342,25 @@ onMounted(() => {
 }
 
 .page-header {
-  margin-bottom: 24px;
+  margin-bottom: 28px;
 }
 
 .page-title {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin: 0 0 8px;
-  font-size: 26px;
-  color: #3a3a3a;
-  font-weight: 600;
+  margin: 0 0 10px;
+  font-size: 28px;
+  color: #1a202c;
+  font-weight: 700;
+}
+
+.page-title .el-icon {
+  color: #38b2ac;
 }
 
 .page-desc {
-  color: #888;
+  color: #718096;
   font-size: 15px;
   margin: 0;
 }
@@ -371,9 +375,10 @@ onMounted(() => {
 .card-header .header-left {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-weight: 500;
-  color: #3a3a3a;
+  gap: 10px;
+  font-weight: 600;
+  color: #1a202c;
+  font-size: 16px;
 }
 
 .header-actions {
@@ -384,14 +389,14 @@ onMounted(() => {
 .action-btn {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
 }
 
 .upload-card :deep(.el-card__header),
 .preview-card :deep(.el-card__header),
 .history-card :deep(.el-card__header) {
-  background: #faf9f7;
-  border-bottom: 1px solid #f0eeeb;
+  background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+  border-bottom: 1px solid #e2e8f0;
 }
 
 .upload-card, .preview-card {
@@ -405,46 +410,47 @@ onMounted(() => {
 }
 
 .notes-form :deep(.el-form-item__label) {
-  font-weight: 500;
-  color: #3a3a3a;
+  font-weight: 600;
+  color: #2d3748;
   font-size: 15px;
   padding-bottom: 8px;
 }
 
 .content-input :deep(.el-textarea__inner) {
-  border-radius: 10px;
-  padding: 14px;
+  border-radius: 12px;
+  padding: 16px;
   font-size: 15px;
   line-height: 1.7;
+  color: #2d3748;
 }
 
 .upload-demo :deep(.el-upload-dragger) {
-  border-radius: 12px;
-  border-color: #e0ddd8;
-  background: #faf9f7;
-  padding: 32px;
+  border-radius: 16px;
+  border-color: #e2e8f0;
+  background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+  padding: 40px;
   transition: all 0.3s ease;
 }
 
 .upload-demo :deep(.el-upload-dragger:hover) {
-  border-color: #c4b5a0;
-  background: #f5f3f0;
+  border-color: #667eea;
+  background: linear-gradient(135deg, #edf2f7 0%, #e2e8f0 100%);
 }
 
 .upload-demo :deep(.el-icon--upload) {
-  color: #a8b5a0;
-  margin-bottom: 12px;
+  color: #667eea;
+  margin-bottom: 16px;
 }
 
 .upload-demo :deep(.el-upload__text) {
-  color: #666;
-  font-size: 14px;
+  color: #4a5568;
+  font-size: 15px;
 }
 
 .upload-demo :deep(.el-upload__text em) {
-  color: #8fa3b8;
+  color: #667eea;
   font-style: normal;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .upload-demo :deep(.el-upload__tip) {

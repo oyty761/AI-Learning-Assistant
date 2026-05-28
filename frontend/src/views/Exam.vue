@@ -244,21 +244,25 @@ onMounted(() => {
 }
 
 .page-header {
-  margin-bottom: 24px;
+  margin-bottom: 28px;
 }
 
 .page-title {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin: 0 0 8px;
-  font-size: 26px;
-  color: #3a3a3a;
-  font-weight: 600;
+  margin: 0 0 10px;
+  font-size: 28px;
+  color: #1a202c;
+  font-weight: 700;
+}
+
+.page-title .el-icon {
+  color: #f687b3;
 }
 
 .page-desc {
-  color: #888;
+  color: #718096;
   font-size: 15px;
   margin: 0;
 }
@@ -273,16 +277,17 @@ onMounted(() => {
 .card-header .header-left {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-weight: 500;
-  color: #3a3a3a;
+  gap: 10px;
+  font-weight: 600;
+  color: #1a202c;
+  font-size: 16px;
 }
 
 .exam-card :deep(.el-card__header),
 .profile-card :deep(.el-card__header),
 .recommend-card :deep(.el-card__header) {
-  background: #faf9f7;
-  border-bottom: 1px solid #f0eeeb;
+  background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+  border-bottom: 1px solid #e2e8f0;
 }
 
 .exam-card {
@@ -293,11 +298,11 @@ onMounted(() => {
 .refresh-btn {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
 }
 
 .exam-content {
-  padding: 16px;
+  padding: 20px;
 }
 
 .exam-text {
@@ -307,13 +312,13 @@ onMounted(() => {
 
 .exam-text :deep(h1), .exam-text :deep(h2), .exam-text :deep(h3) {
   margin: 24px 0 16px;
-  color: #3a3a3a;
-  font-weight: 600;
+  color: #1a202c;
+  font-weight: 700;
 }
 
 .exam-text :deep(h1) {
   font-size: 24px;
-  border-bottom: 2px solid #e0ddd8;
+  border-bottom: 2px solid #e2e8f0;
   padding-bottom: 12px;
 }
 
@@ -323,12 +328,12 @@ onMounted(() => {
 
 .exam-text :deep(h3) {
   font-size: 17px;
-  color: #555;
+  color: #4a5568;
 }
 
 .exam-text :deep(p) {
   margin: 14px 0;
-  color: #555;
+  color: #4a5568;
 }
 
 .exam-text :deep(ul), .exam-text :deep(ol) {
@@ -341,30 +346,30 @@ onMounted(() => {
 }
 
 .exam-text :deep(code) {
-  background: rgba(143, 163, 184, 0.15);
+  background: rgba(102, 126, 234, 0.1);
   padding: 3px 8px;
-  border-radius: 4px;
+  border-radius: 6px;
   font-family: 'Fira Code', monospace;
   font-size: 14px;
-  color: #6b8cae;
+  color: #667eea;
 }
 
 .exam-divider {
   margin: 32px 0;
-  border-color: #f0eeeb;
+  border-color: #e2e8f0;
 }
 
 .exam-actions {
   display: flex;
   justify-content: center;
-  padding: 16px 0;
+  padding: 20px 0;
 }
 
 .diagnose-btn {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 0 32px;
+  gap: 10px;
+  padding: 0 36px;
   height: 48px;
   font-size: 16px;
 }
@@ -377,7 +382,7 @@ onMounted(() => {
 }
 
 .empty-icon {
-  color: #c4b5a0;
+  color: #cbd5e0;
   margin-bottom: 16px;
 }
 
@@ -391,7 +396,7 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   margin-top: 30px;
-  color: #8fa3b8;
+  color: #667eea;
   font-size: 16px;
   gap: 10px;
 }
@@ -411,7 +416,7 @@ onMounted(() => {
 }
 
 .profile-card, .recommend-card {
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 .stats-container {
@@ -422,8 +427,8 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 0;
-  border-bottom: 1px solid #f0eeeb;
+  padding: 18px 0;
+  border-bottom: 1px solid #e2e8f0;
 }
 
 .stat-item:last-child {
@@ -431,47 +436,48 @@ onMounted(() => {
 }
 
 .stat-label {
-  color: #666;
+  color: #4a5568;
   font-size: 15px;
+  font-weight: 500;
 }
 
 .stat-value {
   font-size: 28px;
-  font-weight: 600;
-  color: #8fa3b8;
+  font-weight: 700;
+  color: #667eea;
 }
 
 .stat-value.error {
-  color: #b88a8a;
+  color: #f56565;
 }
 
 .profile-divider {
-  margin: 16px 0;
-  border-color: #f0eeeb;
+  margin: 20px 0;
+  border-color: #e2e8f0;
 }
 
 .section-title {
-  font-size: 15px;
-  color: #3a3a3a;
-  margin: 0 0 16px;
+  font-size: 16px;
+  color: #1a202c;
+  margin: 0 0 18px;
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-weight: 600;
+  gap: 10px;
+  font-weight: 700;
 }
 
 .section-title :deep(.el-icon) {
-  color: #c4a77d;
+  color: #ed8936;
 }
 
 .attention-item {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  padding: 16px;
-  background: #faf9f7;
-  border-radius: 10px;
-  margin-bottom: 12px;
+  padding: 18px;
+  background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+  border-radius: 12px;
+  margin-bottom: 14px;
   cursor: pointer;
   transition: all 0.3s ease;
   border: 1px solid transparent;
@@ -479,48 +485,48 @@ onMounted(() => {
 
 .attention-item:hover {
   background: #fff;
-  border-color: #e0ddd8;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border-color: #cbd5e0;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
 }
 
 .attention-info {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
   flex: 1;
 }
 
 .knowledge-point {
-  font-weight: 600;
-  color: #3a3a3a;
+  font-weight: 700;
+  color: #1a202c;
   font-size: 15px;
 }
 
 .error-type-tag {
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .error-details {
   font-size: 13px;
-  color: #888;
+  color: #718096;
   line-height: 1.5;
 }
 
 .count-tag {
-  font-weight: 600;
+  font-weight: 700;
   flex-shrink: 0;
 }
 
 .no-attention {
-  padding: 24px 0;
+  padding: 28px 0;
 }
 
 .loading-profile {
-  padding: 24px 0;
+  padding: 28px 0;
 }
 
 .recommend-alert :deep(.el-alert__title) {
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .recommend-btn {

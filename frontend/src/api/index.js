@@ -22,7 +22,10 @@ export const notesApi = {
 
 // 对话导师模块API
 export const tutorApi = {
-  ask: (userId, question, sessionId) => api.post('/tutor/ask', { userId, question, sessionId }),
+  ask: (userId, question, sessionId, imageUrls = []) => api.post('/tutor/ask', { userId, question, sessionId, imageUrls }),
+  uploadImage: (formData) => api.post('/tutor/upload-image', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  }),
   getHistory: (userId) => api.get('/tutor/history', { params: { userId } }),
   getSessions: (userId) => api.get('/tutor/sessions', { params: { userId } }),
   getSessionMessages: (sessionId) => api.get(`/tutor/session/${sessionId}/messages`),
@@ -46,10 +49,24 @@ export const diagnoseApi = {
 // 出题教练模块API
 export const examApi = {
   generate: (userId) => api.post('/exam/generate', { userId }),
-  generateSpecific: (knowledgePoint, errorType) => 
+  generateSpecific: (knowledgePoint, errorType) =>
     api.post('/exam/generate-specific', { knowledgePoint, errorType }),
   getProfile: (userId) => api.get(`/exam/profile/${userId}`),
   shouldRecommend: (userId) => api.get('/exam/should-recommend', { params: { userId } })
+}
+
+// 待办事项模块API
+export const todoApi = {
+  create: (data) => api.post('/todo', data),
+  update: (id, data) => api.put(`/todo/${id}`, data),
+  delete: (id) => api.delete(`/todo/${id}`),
+  toggle: (id) => api.patch(`/todo/${id}/toggle`),
+  getById: (id) => api.get(`/todo/${id}`),
+  getList: (userId) => api.get('/todo/list', { params: { userId } }),
+  getByStatus: (userId, isCompleted) => api.get('/todo/list/by-status', { params: { userId, isCompleted } }),
+  getByCategory: (userId, category) => api.get('/todo/list/by-category', { params: { userId, category } }),
+  getStats: (userId) => api.get('/todo/stats', { params: { userId } }),
+  getSorted: (userId, sortBy) => api.get('/todo/list/sorted', { params: { userId, sortBy } })
 }
 
 export default api
