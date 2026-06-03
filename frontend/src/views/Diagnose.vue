@@ -3,9 +3,9 @@
     <div class="page-header">
       <h2 class="page-title">
         <el-icon><Search /></el-icon>
-        错题诊断
+        解题诊断
       </h2>
-      <p class="page-desc">上传题目和解答，AI帮你分析错误原因</p>
+      <p class="page-desc">上传题目和解答，AI帮你分析解答情况</p>
     </div>
 
     <el-row :gutter="24">

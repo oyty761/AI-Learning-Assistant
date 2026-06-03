@@ -42,7 +42,7 @@ public class AiService {
         try {
             if (apiKey == null || apiKey.isEmpty()) {
                 log.error("API Key未配置");
-                return "AI服务未配置，请联系管理员设置API Key";
+                return "AI服务调用失败: API Key未配置，请在application.yml中设置ai.ecnu.api-key或通过环境变量AI_ECNU_API_KEY配置";
             }
 
             String url = baseUrl + "/chat/completions";
@@ -409,6 +409,13 @@ public class AiService {
             如果是"迁移困难型"错误，请设计一道需要运用已学方法解决新问题的题目。
             """, knowledgePoint, errorType);
 
+        return callChatECNU(prompt);
+    }
+
+    /**
+     * 生成文本内容（通用方法）
+     */
+    public String generateText(String prompt) {
         return callChatECNU(prompt);
     }
 

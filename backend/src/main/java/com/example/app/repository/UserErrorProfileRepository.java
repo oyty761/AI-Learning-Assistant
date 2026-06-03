@@ -16,4 +16,6 @@ public interface UserErrorProfileRepository extends JpaRepository<UserErrorProfi
             String userId, String knowledgePoint, String errorType);
     
     List<UserErrorProfile> findByUserIdOrderByErrorCountDesc(String userId);
+    
+    long countByUserIdAndErrorCountGreaterThanEqual(String userId, Integer errorCount);
 }

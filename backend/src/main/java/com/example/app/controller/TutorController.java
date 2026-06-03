@@ -5,7 +5,6 @@ import com.example.app.service.TutorService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashMap;
 import java.util.List;
@@ -20,14 +19,13 @@ public class TutorController {
     private final TutorService tutorService;
 
     /**
-     * 创建新会话并提问（支持图片）
+     * 创建新会话并提问
      */
     @PostMapping("/ask")
-    public ResponseEntity<?> askQuestion(@RequestBody Map<String, Object> request) {
-        String userId = (String) request.get("userId");
-        String question = (String) request.get("question");
-        String sessionId = (String) request.get("sessionId");
-        List<String> imageUrls = (List<String>) request.get("imageUrls");
+    public ResponseEntity<?> askQuestion(@RequestBody Map<String, String> request) {
+        String userId = request.get("userId");
+        String question = request.get("question");
+        String sessionId = request.get("sessionId");
 
         if (userId == null || question == null) {
             return ResponseEntity.badRequest().body("缺少必要参数");
@@ -39,14 +37,21 @@ public class TutorController {
 
             if (sessionId == null || sessionId.isEmpty()) {
                 // 创建新会话
-                newSessionId = tutorService.createSession(userId, question, imageUrls);
+                newSessionId = tutorService.createSession(userId, question);
                 // 获取刚创建的会话的第一条消息
                 List<QaHistory> messages = tutorService.getSessionMessages(newSessionId);
                 answer = messages.isEmpty() ? "" : messages.get(0).getAnswer();
             } else {
                 // 继续现有会话
                 newSessionId = sessionId;
-                answer = tutorService.continueDialogue(userId, sessionId, question, imageUrls);
+                answer = tutorService.continueDialogue(userId, sessionId, question);
+            }
+
+            // 检查AI服务是否返回错误
+            if (answer != null && answer.startsWith("AI服务调用失败")) {
+                Map<String, String> errorResult = new HashMap<>();
+                errorResult.put("error", answer);
+                return ResponseEntity.internalServerError().body(errorResult);
             }
 
             Map<String, String> result = new HashMap<>();
@@ -54,26 +59,9 @@ public class TutorController {
             result.put("sessionId", newSessionId);
             return ResponseEntity.ok(result);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body("问答失败: " + e.getMessage());
-        }
-    }
-
-    /**
-     * 上传图片
-     */
-    @PostMapping("/upload-image")
-    public ResponseEntity<?> uploadImage(@RequestParam("file") MultipartFile file) {
-        if (file.isEmpty()) {
-            return ResponseEntity.badRequest().body("请选择要上传的图片");
-        }
-
-        try {
-            String imageUrl = tutorService.uploadImage(file);
-            Map<String, String> result = new HashMap<>();
-            result.put("url", imageUrl);
-            return ResponseEntity.ok(result);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("上传失败: " + e.getMessage());
+            Map<String, String> errorResult = new HashMap<>();
+            errorResult.put("error", "问答失败: " + e.getMessage());
+            return ResponseEntity.internalServerError().body(errorResult);
         }
     }
 

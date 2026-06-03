@@ -38,9 +38,6 @@ public class QaHistory {
     @Column(name = "knowledge_points", columnDefinition = "TEXT")
     private String knowledgePoints;
 
-    @Column(name = "image_urls", columnDefinition = "TEXT")
-    private String imageUrls;
-
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 

@@ -4,6 +4,7 @@ import com.example.app.entity.QaHistory;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -18,4 +19,10 @@ public interface QaHistoryRepository extends JpaRepository<QaHistory, Long> {
 
     // 根据用户ID查询所有会话（按会话ID分组，取每个会话的第一条）
     List<QaHistory> findByUserIdAndIdIn(String userId, List<Long> ids);
+    
+    long countByUserId(String userId);
+    
+    long countByUserIdAndCreatedAtAfter(String userId, LocalDateTime createdAt);
+    
+    List<QaHistory> findByUserIdAndCreatedAtAfter(String userId, LocalDateTime createdAt);
 }

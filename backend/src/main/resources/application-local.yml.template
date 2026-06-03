@@ -1,0 +1,9 @@
+# 本地开发配置文件模板
+# 复制此文件为 application-local.yml 并填入你的实际配置
+
+# AI Service Configuration
+ai:
+  ecnu:
+    api-key: your-actual-api-key-here
+    base-url: https://chat.ecnu.edu.cn/open/api/v1
+    model: ChatECNU

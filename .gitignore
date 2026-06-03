@@ -55,6 +55,14 @@ application-dev.yml
 data/
 uploads/
 
+# 数据库文件
+*.db
+*.mv.db
+*.trace.db
+
+# H2数据库目录
+backend/data/
+
 # 临时文件
 *.tmp
 *.temp

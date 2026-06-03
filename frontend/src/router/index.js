@@ -5,6 +5,7 @@ import Tutor from '../views/Tutor.vue'
 import Diagnose from '../views/Diagnose.vue'
 import Exam from '../views/Exam.vue'
 import Todo from '../views/Todo.vue'
+import Analysis from '../views/Analysis.vue'
 
 const routes = [
   { path: '/', name: 'Home', component: Home },
@@ -12,7 +13,8 @@ const routes = [
   { path: '/tutor', name: 'Tutor', component: Tutor },
   { path: '/diagnose', name: 'Diagnose', component: Diagnose },
   { path: '/exam', name: 'Exam', component: Exam },
-  { path: '/todo', name: 'Todo', component: Todo }
+  { path: '/todo', name: 'Todo', component: Todo },
+  { path: '/analysis', name: 'Analysis', component: Analysis }
 ]
 
 const router = createRouter({

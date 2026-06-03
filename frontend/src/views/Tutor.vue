@@ -53,16 +53,6 @@
           </div>
 
           <div class="input-area">
-            <!-- 图片预览区域 -->
-            <div v-if="selectedImages.length > 0" class="image-preview-area">
-              <div v-for="(img, index) in selectedImages" :key="index" class="image-preview-item">
-                <img :src="img.preview" alt="预览" />
-                <div class="remove-image" @click="removeImage(index)">
-                  <el-icon><Close /></el-icon>
-                </div>
-              </div>
-            </div>
-
             <el-input
               v-model="inputMessage"
               type="textarea"
@@ -72,32 +62,15 @@
               class="chat-input"
             />
             <div class="input-actions">
-              <div class="left-actions">
-                <el-upload
-                  ref="uploadRef"
-                  action=""
-                  :auto-upload="false"
-                  :show-file-list="false"
-                  :on-change="handleImageChange"
-                  :limit="3"
-                  accept="image/jpeg,image/png,image/gif"
-                  class="image-upload"
-                >
-                  <el-button type="info" text size="small">
-                    <el-icon><Picture /></el-icon>
-                    上传图片
-                  </el-button>
-                </el-upload>
-                <span class="hint">
-                  <el-icon><InfoFilled /></el-icon>
-                  Ctrl + Enter 发送
-                </span>
-              </div>
+              <span class="hint">
+                <el-icon><InfoFilled /></el-icon>
+                Ctrl + Enter 发送
+              </span>
               <el-button
                 type="primary"
                 @click="sendMessage"
                 :loading="loading"
-                :disabled="!inputMessage.trim() && selectedImages.length === 0"
+                :disabled="!inputMessage.trim()"
                 size="large"
               >
                 <el-icon><Promotion /></el-icon>
@@ -183,7 +156,7 @@ import { useRoute } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { marked } from 'marked'
 import { tutorApi } from '../api'
-import { UserFilled, School, Promotion, Plus, Delete, InfoFilled, Clock, Check, Picture, Close } from '@element-plus/icons-vue'
+import { UserFilled, School, Promotion, Plus, Delete, InfoFilled, Clock, Check } from '@element-plus/icons-vue'
 
 const route = useRoute()
 const messages = ref([])
@@ -194,8 +167,6 @@ const sessions = ref([])
 const currentSessionId = ref(null)
 const chatContainer = ref(null)
 const noteContext = ref(null)
-const selectedImages = ref([])
-const uploadRef = ref(null)
 
 const userId = 'user001'
 
@@ -232,7 +203,6 @@ const startNewChat = () => {
   messages.value = []
   inputMessage.value = ''
   noteContext.value = null
-  selectedImages.value = []
 
   // 添加AI问候消息
   messages.value.push({
@@ -244,85 +214,34 @@ const startNewChat = () => {
   ElMessage.success('已开始新对话')
 }
 
-const handleImageChange = (file) => {
-  if (selectedImages.value.length >= 3) {
-    ElMessage.warning('最多只能上传3张图片')
-    return
-  }
-
-  // 检查文件类型
-  const isImage = file.raw.type.startsWith('image/')
-  if (!isImage) {
-    ElMessage.error('只能上传图片文件')
-    return
-  }
-
-  // 检查文件大小（5MB）
-  const isLt5M = file.raw.size / 1024 / 1024 < 5
-  if (!isLt5M) {
-    ElMessage.error('图片大小不能超过5MB')
-    return
-  }
-
-  // 创建预览URL
-  const preview = URL.createObjectURL(file.raw)
-  selectedImages.value.push({
-    file: file.raw,
-    preview: preview
-  })
-}
-
-const removeImage = (index) => {
-  selectedImages.value.splice(index, 1)
-}
-
-const uploadImages = async () => {
-  const uploadedUrls = []
-  for (const img of selectedImages.value) {
-    try {
-      const formData = new FormData()
-      formData.append('file', img.file)
-      const response = await tutorApi.uploadImage(formData)
-      uploadedUrls.push(response.data.url)
-    } catch (error) {
-      console.error('图片上传失败', error)
-      ElMessage.error('图片上传失败')
-    }
-  }
-  return uploadedUrls
-}
-
 const sendMessage = async () => {
   const question = inputMessage.value.trim()
-  if ((!question && selectedImages.value.length === 0) || loading.value) return
-
-  // 上传图片
-  let imageUrls = []
-  if (selectedImages.value.length > 0) {
-    imageUrls = await uploadImages()
-  }
-
-  // 构建消息内容
-  let messageContent = question
-  if (imageUrls.length > 0) {
-    messageContent += '\n\n[图片]'
-  }
+  if (!question || loading.value) return
 
   // 添加用户消息
   messages.value.push({
     role: 'user',
-    content: messageContent,
-    images: selectedImages.value.map(img => img.preview),
+    content: question,
     time: new Date()
   })
 
   inputMessage.value = ''
-  selectedImages.value = []
   loading.value = true
   scrollToBottom()
 
   try {
-    const response = await tutorApi.ask(userId, question, currentSessionId.value, imageUrls)
+    const response = await tutorApi.ask(userId, question, currentSessionId.value)
+
+    // 检查后端返回的错误
+    if (response.data.error) {
+      messages.value.push({
+        role: 'assistant',
+        content: response.data.error,
+        time: new Date()
+      })
+      ElMessage.error(response.data.error)
+      return
+    }
 
     // 如果是新会话，保存sessionId
     if (!currentSessionId.value && response.data.sessionId) {
@@ -338,8 +257,13 @@ const sendMessage = async () => {
     // 刷新会话列表
     loadSessions()
   } catch (error) {
-    ElMessage.error('发送失败: ' + error.message)
-    messages.value.pop()
+    const errorMsg = error.response?.data?.error || error.message || '发送失败'
+    messages.value.push({
+      role: 'assistant',
+      content: 'AI服务调用失败: ' + errorMsg,
+      time: new Date()
+    })
+    ElMessage.error('发送失败: ' + errorMsg)
   } finally {
     loading.value = false
     scrollToBottom()
@@ -463,7 +387,7 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
 }
 
 .page-title {
@@ -471,43 +395,38 @@ onMounted(() => {
   align-items: center;
   gap: 12px;
   margin: 0;
-  font-size: 28px;
-  color: #1a202c;
-  font-weight: 700;
-}
-
-.page-title .el-icon {
-  color: #667eea;
+  font-size: 26px;
+  color: #3a3a3a;
+  font-weight: 600;
 }
 
 .new-chat-btn {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
 .chat-card {
   height: calc(100vh - 180px);
   display: flex;
   flex-direction: column;
-  border: 1px solid #e2e8f0;
+  border: none;
   background: #fff;
-  border-radius: 16px;
 }
 
 .chat-container {
   flex: 1;
   overflow-y: auto;
-  padding: 28px;
-  background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
-  border-radius: 16px;
-  margin-bottom: 24px;
+  padding: 24px;
+  background: #faf9f7;
+  border-radius: 12px;
+  margin-bottom: 20px;
 }
 
 .message {
   display: flex;
-  gap: 16px;
-  margin-bottom: 28px;
+  gap: 14px;
+  margin-bottom: 24px;
   animation: fadeIn 0.3s ease;
 }
 
@@ -527,30 +446,27 @@ onMounted(() => {
 }
 
 .message-avatar :deep(.el-avatar) {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #9db4c4 0%, #a8b5a0 100%);
   color: #fff;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
 .message-avatar :deep(.el-avatar.user) {
-  background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
-  box-shadow: 0 4px 12px rgba(72, 187, 120, 0.3);
+  background: linear-gradient(135deg, #8fa3b8 0%, #9db4c4 100%);
 }
 
 .message-content {
   max-width: 75%;
   background: #fff;
-  padding: 18px 22px;
-  border-radius: 18px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
-  border: 1px solid #e2e8f0;
+  padding: 16px 20px;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border: 1px solid #f0eeeb;
 }
 
 .message.user .message-content {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #8fa3b8 0%, #9db4c4 100%);
   color: white;
   border: none;
-  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3);
 }
 
 .message-header {
@@ -575,7 +491,7 @@ onMounted(() => {
 }
 
 .message-body {
-  line-height: 1.8;
+  line-height: 1.7;
   font-size: 15px;
 }
 
@@ -589,12 +505,12 @@ onMounted(() => {
 }
 
 .message-body :deep(code) {
-  background: rgba(102, 126, 234, 0.1);
+  background: rgba(143, 163, 184, 0.15);
   padding: 3px 8px;
-  border-radius: 6px;
+  border-radius: 4px;
   font-family: 'Fira Code', monospace;
   font-size: 14px;
-  color: #667eea;
+  color: #6b8cae;
 }
 
 .message.user .message-body :deep(code) {
@@ -603,109 +519,53 @@ onMounted(() => {
 }
 
 .input-area {
-  border-top: 1px solid #e2e8f0;
-  padding-top: 24px;
+  border-top: 1px solid #f0eeeb;
+  padding-top: 20px;
 }
 
 .chat-input :deep(.el-textarea__inner) {
-  border-radius: 14px;
-  padding: 18px;
+  border-radius: 12px;
+  padding: 16px;
   font-size: 15px;
   resize: none;
-  border-color: #e2e8f0;
 }
 
 .input-actions {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 18px;
-}
-
-.left-actions {
-  display: flex;
-  align-items: center;
-  gap: 18px;
+  margin-top: 16px;
 }
 
 .hint {
-  color: #a0aec0;
+  color: #999;
   font-size: 13px;
   display: flex;
   align-items: center;
   gap: 6px;
 }
 
-.image-upload :deep(.el-upload) {
-  display: inline-block;
-}
-
-.image-preview-area {
-  display: flex;
-  gap: 12px;
-  margin-bottom: 16px;
-  flex-wrap: wrap;
-}
-
-.image-preview-item {
-  position: relative;
-  width: 80px;
-  height: 80px;
-  border-radius: 10px;
-  overflow: hidden;
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-}
-
-.image-preview-item img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.remove-image {
-  position: absolute;
-  top: 4px;
-  right: 4px;
-  width: 20px;
-  height: 20px;
-  background: rgba(245, 101, 101, 0.8);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.remove-image:hover {
-  background: rgba(245, 101, 101, 1);
-  transform: scale(1.1);
-}
-
 .info-card, .tips-card {
-  margin-bottom: 24px;
-  border: 1px solid #e2e8f0;
-  border-radius: 16px;
+  margin-bottom: 20px;
+  border: none;
 }
 
 .info-card :deep(.el-card__header),
 .tips-card :deep(.el-card__header) {
-  background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
-  border-bottom: 1px solid #e2e8f0;
+  background: #faf9f7;
+  border-bottom: 1px solid #f0eeeb;
 }
 
 .card-header {
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-weight: 600;
-  color: #1a202c;
-  font-size: 16px;
+  gap: 8px;
+  font-weight: 500;
+  color: #3a3a3a;
 }
 
 .empty-history {
-  padding: 28px 0;
+  padding: 24px 0;
 }
 
 .history-list {
@@ -714,24 +574,24 @@ onMounted(() => {
 }
 
 .history-item {
-  padding: 16px 18px;
-  border-bottom: 1px solid #e2e8f0;
+  padding: 14px 16px;
+  border-bottom: 1px solid #f0eeeb;
   cursor: pointer;
   transition: all 0.3s ease;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-radius: 10px;
-  margin-bottom: 6px;
+  border-radius: 8px;
+  margin-bottom: 4px;
 }
 
 .history-item:hover {
-  background: #f7fafc;
+  background: #faf9f7;
 }
 
 .history-item.active {
-  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.05) 100%);
-  border-left: 3px solid #667eea;
+  background: rgba(143, 163, 184, 0.12);
+  border-left: 3px solid #8fa3b8;
 }
 
 .history-content {
@@ -741,17 +601,17 @@ onMounted(() => {
 
 .history-question {
   font-size: 14px;
-  color: #2d3748;
+  color: #3a3a3a;
   margin-bottom: 6px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .history-time {
   font-size: 12px;
-  color: #a0aec0;
+  color: #999;
 }
 
 .delete-btn {
@@ -774,11 +634,11 @@ onMounted(() => {
   display: flex;
   align-items: flex-start;
   gap: 10px;
-  padding: 14px 0;
-  color: #4a5568;
+  padding: 12px 0;
+  color: #555;
   font-size: 14px;
   line-height: 1.6;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid #f5f3f0;
 }
 
 .tips-list li:last-child {
@@ -786,7 +646,7 @@ onMounted(() => {
 }
 
 .tips-list li :deep(.el-icon) {
-  color: #48bb78;
+  color: #7a9e7e;
   margin-top: 2px;
   flex-shrink: 0;
 }
